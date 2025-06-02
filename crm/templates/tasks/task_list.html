@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+    <h4 class="text-gradient fw-bold" style="background: linear-gradient(90deg, #f7971e, #ffd200); -webkit-background-clip: text; color: transparent;">
+      <i class="fas fa-clipboard-list me-3"></i>
+      {% if user.is_superuser or user.is_staff %}All Tasks{% else %}Your Tasks{% endif %}
+    </h4>
+    <a href="{% url 'task-create' %}" class="btn btn-gradient d-flex align-items-center gap-2">
+      <i class="fas fa-plus"></i> Add Task
+    </a>
+  </div>
+
+  <form method="get" class="row g-3 mb-4">
+    <div class="col-md-8 col-sm-12">
+      <input type="search" name="q" value="{{ request.GET.q }}" class="form-control form-control-lg rounded-pill shadow-sm" placeholder="Search tasks..." autocomplete="off" />
+    </div>
+    <div class="col-md-4 col-sm-12 d-grid">
+      <button type="submit" class="btn btn-outline-warning btn-lg rounded-pill fw-semibold">
+        <i class="fas fa-search me-2"></i> Search
+      </button>
+    </div>
+  </form>
+
+  <div class="table-responsive shadow rounded-4 overflow-hidden">
+    <table class="table mb-0" style="border-collapse: separate; border-spacing: 0 15px;">
+      <thead>
+        <tr class="bg-dark text-white text-uppercase small" style="letter-spacing: 0.05em;">
+          <th class="ps-4 rounded-start">Title</th>
+          <th>Due</th>
+          <th>Status</th>
+          <th>Contact</th>
+          <th>Assigned</th>
+          {% if user.is_superuser or user.is_staff %}
+          <th>Created By</th>
+          {% endif %}
+          <th class="pe-4 rounded-end text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr class="bg-white rounded-3 shadow-sm mb-3 align-middle d-table-row">
+          <td class="ps-4 fw-semibold text-warning">{{ task.title }}</td>
+          <td class="text-muted fst-italic">{{ task.due_date|date:"d M Y, H:i" }}</td>
+          <td>
+            {% if task.completed %}
+              <span class="badge bg-success px-3 py-2 fw-semibold rounded-pill">Completed</span>
+            {% else %}
+              <span class="badge bg-warning text-dark px-3 py-2 fw-semibold rounded-pill">Pending</span>
+            {% endif %}
+          </td>
+          <td>{{ task.contact.name }}</td>
+          <td class="text-primary fw-medium">{{ task.assigned_to.username }}</td>
+          {% if user.is_superuser or user.is_staff %}
+          <td class="text-muted fst-italic">{{ task.created_by.username }}</td>
+          {% endif %}
+          <td class="text-center">
+            <a href="{% url 'task-update' task.id %}" class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm" title="Edit Task">
+              <i class="fas fa-pen"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="{% if user.is_superuser or user.is_staff %}7{% else %}6{% endif %}" class="text-center text-muted py-5 fst-italic" style="font-size: 1.15rem;">
+            No tasks found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  /* Gradient button style */
+  .btn-gradient {
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    color: #3a3a3a;
+    font-weight: 600;
+    border: none;
+    transition: background 0.3s ease;
+  }
+  .btn-gradient:hover {
+    background: linear-gradient(90deg, #ffd200, #f7971e);
+    color: #1a1a1a;
+  }
+
+  /* Table header tweaks */
+  thead tr {
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.15);
+  }
+
+  /* Table body rows */
+  tbody tr {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  tbody tr:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgb(0 0 0 / 0.18);
+  }
+
+  /* Rounded corners for first and last headers */
+  thead th.rounded-start {
+    border-top-left-radius: 16px;
+  }
+  thead th.rounded-end {
+    border-top-right-radius: 16px;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .btn-gradient {
+      font-size: 1rem;
+      padding: 0.5rem 1.25rem;
+    }
+    h4 {
+      font-size: 1.5rem !important;
+    }
+    form.row.g-3 {
+      gap: 1rem;
+    }
+  }
+</style>
+
+{% endblock %}

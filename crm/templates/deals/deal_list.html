@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+    <h3 class="fw-bold text-gradient" style="background: linear-gradient(45deg, #6a11cb, #2575fc); -webkit-background-clip: text; color: transparent;">
+      <i class="fas fa-briefcase me-3"></i>
+      {% if user.is_superuser or user.is_staff %}All Deals{% else %}Your Deals{% endif %}
+    </h3>
+    <a href="{% url 'deal-create' %}" class="btn btn-gradient d-flex align-items-center gap-2">
+      <i class="fas fa-plus"></i> Add Deal
+    </a>
+  </div>
+
+  <div class="table-responsive shadow rounded-4 overflow-hidden">
+    <table class="table align-middle mb-0" style="border-collapse: separate; border-spacing: 0 12px;">
+      <thead>
+        <tr class="bg-dark text-white rounded-3">
+          <th class="ps-4 rounded-start">Title</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Close Date</th>
+          {% if user.is_superuser or user.is_staff %}
+          <th>Created By</th>
+          {% endif %}
+          <th class="pe-4 rounded-end text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for deal in deals %}
+        <tr class="shadow-sm bg-light rounded-3 mb-2 d-table-row">
+          <td class="ps-4 fw-semibold text-primary">{{ deal.title }}</td>
+          <td class="text-success fw-semibold">${{ deal.amount }}</td>
+          <td class="text-uppercase">{{ deal.currency }}</td>
+          <td>{{ deal.contact.name }}</td>
+          <td>
+            <span class="status-badge status-{{ deal.status }}">
+              {{ deal.get_status_display }}
+            </span>
+          </td>
+          <td>{{ deal.close_date|date:"d M Y" }}</td>
+          {% if user.is_superuser or user.is_staff %}
+          <td class="text-muted fst-italic">{{ deal.created_by.username }}</td>
+          {% endif %}
+          <td class="text-center">
+            <a href="{% url 'deal-update' deal.id %}" class="btn btn-sm btn-primary rounded-pill px-3">
+              <i class="fas fa-edit"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-5 fst-italic" style="font-size: 1.2rem;">No deals found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  /* Gradient Button */
+  .btn-gradient {
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    padding: 0.5rem 1.4rem;
+    transition: background 0.3s ease;
+  }
+  .btn-gradient:hover {
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    color: #fff;
+  }
+
+  /* Table tweaks */
+  table thead tr {
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.1);
+  }
+
+  tbody tr {
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  tbody tr:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgb(0 0 0 / 0.12);
+  }
+
+  /* Rounded corners for header cells */
+  thead th.rounded-start {
+    border-top-left-radius: 12px;
+  }
+  thead th.rounded-end {
+    border-top-right-radius: 12px;
+  }
+
+  /* Status badges */
+  .status-badge {
+    display: inline-block;
+    padding: 0.25em 0.75em;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    user-select: none;
+  }
+  .status-badge.status-warning {
+    background-color: #f6c23e;
+  }
+  .status-badge.status-success {
+    background-color: #1cc88a;
+  }
+  .status-badge.status-danger {
+    background-color: #e74a3b;
+  }
+  .status-badge.status-secondary {
+    background-color: #6c757d;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 768px) {
+    .table-responsive {
+      overflow-x: auto;
+    }
+    .btn-gradient {
+      font-size: 0.9rem;
+      padding: 0.4rem 1rem;
+    }
+    h3 {
+      font-size: 1.5rem !important;
+    }
+  }
+</style>
+{% endblock %}
